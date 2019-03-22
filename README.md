@@ -12,7 +12,7 @@ The front-end of this project is the same of the standard Angular Asp.Net Core t
 
 ## How to test the API's (suggestion)
 
-The integration can be tested using HTTP calls. A suggested method to test the API, is use [Postman](https://www.getpostman.com/) and the built-in Postman collection bellow. It has the 3 requests available, so the user must only fill the web server address and the order number when needed.
+The integration can be tested using HTTP calls. A suggested method to test the API, is use [Postman](https://www.getpostman.com/) and the built-in Postman collection bellow. It has the 3 requests available, so the user must only fill the web server address and the bank billet id (order number set when creating the bank billet) when needed.
 
 1. Download [Postman](https://www.getpostman.com/)
 2. Run Postman
