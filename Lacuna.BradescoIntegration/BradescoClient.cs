@@ -125,7 +125,7 @@ namespace Lacuna.BradescoIntegration {
 		/// <summary>
 		/// Retrieves a list of bank billets using Bradesco API according to the parameters received
 		/// </summary>
-		public async Task<BradescoResponsePaginated> ListBankBilletAsync(DateTime startDate, DateTime endDate, string token = null, int status = 0, int offset = 1, int limit = 100) {
+		public async Task<BradescoResponsePaginated> ListBankBilletAsync(DateTime startDate, DateTime endDate, int status = 0, int offset = 1, int limit = 100) {
 
 			var authResp = await queryAuthenticationAsync();
 			if (authResp.Token == null || authResp.Token.Token == null) {
