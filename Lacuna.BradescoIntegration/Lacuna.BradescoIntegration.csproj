@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Version>1.0.0-alpha01</Version>
+    <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>Lacuna.BradescoIntegration.snk</AssemblyOriginatorKeyFile>
+    <Authors>Lacuna Software, Onlinesites</Authors>
+    <Owners>Lacuna Software</Owners>
+    <PackageProjectUrl>https://bitbucket.org/Lacunas/restclient</PackageProjectUrl>
+    <PackageIconUrl>http://pki.lacunasoftware.com/Content/img/nuget-pkg-icon.png</PackageIconUrl>
+    <Description>Library to integrate with Banco Bradesco</Description>
+    <Copyright>Copyright 2019 Lacuna Software</Copyright>
+    <PackageTags>Bradesco, boleto</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.Extensions.Options" Version="2.0.0" />
+  </ItemGroup>
+
+</Project>
