@@ -9,7 +9,7 @@ namespace Lacuna.BradescoIntegration.Request {
 	/// <summary>
 	/// Informações do cedente
 	/// </summary>
-	public class BankBilletRequestConfig : IModelo {
+	public class BankBilletRequestConfig : IModel {
 		/// <summary>
 		/// Nome do beneficiário / cedente
 		/// </summary>
@@ -123,7 +123,7 @@ namespace Lacuna.BradescoIntegration.Request {
 			Instructions = new Dictionary<string, string>();
 		}
 
-		#region Validações
+		#region Validations
 
 		[JsonIgnore]
 		public bool Valid => isValid();
@@ -152,16 +152,15 @@ namespace Lacuna.BradescoIntegration.Request {
 				throw new Exception("É necessário informar uma data de vencimento para o boleto");
 			}
 
-			int valorBoleto;
-			if (!int.TryParse(Value, out valorBoleto) || valorBoleto <= 0) {
+			if (!int.TryParse(Value, out var valorBoleto) || valorBoleto <= 0) {
 				throw new Exception("Valor do boleto não pode estar vazio ou ter um valor menor ou igual a zero");
 			}
 
-			if (!String.IsNullOrEmpty(UrlLogo) && UrlLogo.Length > 255) {
+			if (!string.IsNullOrEmpty(UrlLogo) && UrlLogo.Length > 255) {
 				throw new Exception("Url da logo não pode conter mais do que 255 caracteres");
 			}
 
-			if (!String.IsNullOrEmpty(HeaderMessage) && HeaderMessage.Length > 255) {
+			if (!string.IsNullOrEmpty(HeaderMessage) && HeaderMessage.Length > 255) {
 				throw new Exception("Mensagem do cabeçalho não pode conter mais do que 255 caracteres");
 			}
 

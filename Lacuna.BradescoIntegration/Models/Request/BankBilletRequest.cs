@@ -7,7 +7,7 @@ namespace Lacuna.BradescoIntegration.Models.Request {
 	/// <summary>
 	/// Objeto para requisição junto ao webservice do Bradesco
 	/// </summary>
-	public class BankBilletRequest : IModelo {
+	public class BankBilletRequest : IModel {
 		/// <summary>
 		/// Token enviado pela loja para ser utiliado como parametro adicional da url de confirmação do pedido.
 		/// A url de confirmação do pedido é configurada no gerenciador do lojista.
@@ -48,7 +48,7 @@ namespace Lacuna.BradescoIntegration.Models.Request {
 		[JsonProperty("comprador")]
 		public BankBilletBuyerData BuyerInfo { get; set; }
 
-		#region Validações
+		#region Validations
 
 		[JsonIgnore]
 		public bool Valid => isValid();

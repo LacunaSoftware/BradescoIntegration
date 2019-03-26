@@ -1,5 +1,5 @@
 ﻿namespace Lacuna.BradescoIntegration.Models.Contracts {
-	public interface IModelo {
+	public interface IModel {
 		bool Valid { get; }
 	}
 }

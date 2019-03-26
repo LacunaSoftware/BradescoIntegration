@@ -57,7 +57,7 @@ namespace Lacuna.BradescoIntegration.AppTest.Classes {
 		public static BankBilletBuyerData GenerateBuyerInfo() {
 			var ret = new BankBilletBuyerData {
 				//UserAgent = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36",
-				Address = GenerateByerAddress(),
+				Address = GenerateBuyerAddress(),
 				Name = "Integration Test",
 				//Ip = "127.0.0.1",
 				Document = "55500000756"
@@ -66,7 +66,7 @@ namespace Lacuna.BradescoIntegration.AppTest.Classes {
 			return ret;
 		}
 
-		public static BuyerAddress GenerateByerAddress() {
+		public static BuyerAddress GenerateBuyerAddress() {
 			var ret = new BuyerAddress {
 				Number = "123",
 				City = "Divinopolis",

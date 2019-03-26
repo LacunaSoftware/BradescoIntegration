@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using System;
 
 namespace Lacuna.BradescoIntegration.Models.Request {
-	public class BuyerAddress : IModelo {
+	public class BuyerAddress : IModel {
 		/// <summary>
 		/// Cep apenas números
 		/// </summary>
@@ -47,7 +47,7 @@ namespace Lacuna.BradescoIntegration.Models.Request {
 		public string UF { get; set; }
 
 
-		#region Validações
+		#region Validations
 
 		[JsonIgnore]
 		public bool Valid => isValid();

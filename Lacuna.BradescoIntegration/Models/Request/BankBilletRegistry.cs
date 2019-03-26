@@ -6,7 +6,7 @@ namespace Lacuna.BradescoIntegration.Models.Request {
 	/// <summary>
 	/// Funcionalidade de registro. Este atributo pode ser enviado como nulo
 	/// </summary>
-	public class BankBilletRegistry : IModelo {
+	public class BankBilletRegistry : IModel {
 		/// <summary>
 		/// Agencia ( c/ dígito) Pagador
 		/// Exemplo 14
@@ -161,7 +161,7 @@ namespace Lacuna.BradescoIntegration.Models.Request {
 		[JsonProperty("sequencia_registro")]
 		public string RegistryNumber { get; set; }
 
-		#region Validações
+		#region Validations
 
 		[JsonIgnore]
 		public bool Valid => isValid();

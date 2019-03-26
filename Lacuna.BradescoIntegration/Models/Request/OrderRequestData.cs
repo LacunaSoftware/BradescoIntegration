@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Lacuna.BradescoIntegration.Models.Request {
-	public class OrderRequestData : IModelo {
+	public class OrderRequestData : IModel {
 		/// <summary>
 		/// Identificador do pedido na loja.
 		/// Formato Alfanúmerico

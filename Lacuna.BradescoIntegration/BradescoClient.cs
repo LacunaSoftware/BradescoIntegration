@@ -123,9 +123,17 @@ namespace Lacuna.BradescoIntegration {
 		}
 
 		/// <summary>
-		/// Retrieves a list of bank billets using Bradesco API according to the parameters received
+		/// Retrieves a list of bank billets using Bradesco API according to the parameters received. Difference of start and end dates cannot be greater than 6 days (Bradesco API constraint)
 		/// </summary>
 		public async Task<BradescoResponsePaginated> ListBankBilletAsync(DateTime startDate, DateTime endDate, int status = 0, int offset = 1, int limit = 100) {
+
+			if (endDate < startDate) {
+				throw new Exception("End date mt be greater than the star date.");
+			}
+
+			if (endDate - startDate > TimeSpan.FromDays(6)) {
+				throw new Exception("Difference of start and end dates cannot be greater than 6 days.");
+			}
 
 			var authResp = await queryAuthenticationAsync();
 			if (authResp.Token == null || authResp.Token.Token == null) {

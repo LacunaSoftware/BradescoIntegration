@@ -4,7 +4,7 @@ using Lacuna.BradescoIntegration.Utils;
 using System;
 
 namespace Lacuna.BradescoIntegration.Models.Request {
-	public class BankBilletBuyerData : IModelo {
+	public class BankBilletBuyerData : IModel {
 
 		/// <summary>
 		/// Nome do pagador/sacado
@@ -38,7 +38,7 @@ namespace Lacuna.BradescoIntegration.Models.Request {
 
 
 
-		#region Validações
+		#region Validations
 
 		[JsonIgnore]
 		public bool Valid => isValid();
