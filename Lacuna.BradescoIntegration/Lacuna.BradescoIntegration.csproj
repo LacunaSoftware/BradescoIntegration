@@ -12,6 +12,8 @@
     <Description>Library to integrate with Banco Bradesco</Description>
     <Copyright>Copyright 2019 Lacuna Software</Copyright>
     <PackageTags>Bradesco, boleto</PackageTags>
+    <IncludeSymbols>true</IncludeSymbols>
+    <EmbedAllSources>true</EmbedAllSources>
   </PropertyGroup>
 
   <ItemGroup>
