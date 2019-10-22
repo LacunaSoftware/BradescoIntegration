@@ -85,7 +85,7 @@ namespace Lacuna.BradescoIntegration {
 					 new IsoDateTimeConverter { DateTimeFormat = Constants.DateRetrievalFormat });
 
 				if (response.Status.Code != "0" && response.Status.Code != "-501") {
-					throw new BradescoIntegrationApiException(HttpMethod.Get, new Uri(HttpGetClient.BaseAddress, requestUri), response.Status.Code, response.Status.Message);
+					throw new BradescoIntegrationApiException(HttpMethod.Post, new Uri(HttpGetClient.BaseAddress, requestUri), response.Status.Code, response.Status.Message);
 				}
 
 				return response;
