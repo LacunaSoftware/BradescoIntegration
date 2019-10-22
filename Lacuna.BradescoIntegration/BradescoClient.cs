@@ -84,7 +84,10 @@ namespace Lacuna.BradescoIntegration {
 				var response = JsonConvert.DeserializeObject<BankBilletGenerationResponse>(jsonResp,
 					 new IsoDateTimeConverter { DateTimeFormat = Constants.DateRetrievalFormat });
 
-				if (response.Status.Code != "0" && response.Status.Code != "-501") {
+				// Considerando como sucesso respostas com código 93005999, conforme manual:
+				// "93005999 - ² Para este retorno, não é necessária nenhuma ação pois o Registro será processado internamente"
+
+				if (response.Status.Code != "0" && response.Status.Code != "-501" && response.Status.Code != "93005999") {
 					throw new BradescoIntegrationApiException(HttpMethod.Post, new Uri(HttpGetClient.BaseAddress, requestUri), response.Status.Code, response.Status.Message);
 				}
 
