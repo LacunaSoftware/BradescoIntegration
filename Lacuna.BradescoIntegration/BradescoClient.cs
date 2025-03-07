@@ -101,11 +101,11 @@ namespace Lacuna.BradescoIntegration {
 		public async Task<BradescoResponse> GetBankBilletAsync(string orderNumber) {
 
 			var authResp = await queryAuthenticationAsync();
-			if (authResp.Token == null || authResp.Token.Token == null) {
+			if (authResp.TokenInfo == null || authResp.TokenInfo.Token == null) {
 				throw new Exception("No authentication token");
 			}
 
-			var requestUri = $"/SPSConsulta/GetOrderById/{options.MerchantId}?token={authResp.Token.Token}&orderId={orderNumber}";
+			var requestUri = $"/SPSConsulta/GetOrderById/{options.MerchantId}?token={authResp.TokenInfo.Token}&orderId={orderNumber}";
 			var resp = await performHttpRequestAsync(HttpMethod.Get, requestUri,
 				() => HttpGetClient.GetAsync(requestUri)
 			);
@@ -139,11 +139,11 @@ namespace Lacuna.BradescoIntegration {
 			}
 
 			var authResp = await queryAuthenticationAsync();
-			if (authResp.Token == null || authResp.Token.Token == null) {
+			if (authResp.TokenInfo == null || authResp.TokenInfo.Token == null) {
 				throw new Exception("No authentication token");
 			}
 
-			var requestUri = $"/SPSConsulta/GetOrderListPayment/{options.MerchantId}/boleto?token={authResp.Token.Token}&dataInicial={startDate.ToString(Constants.DateUriFormat)}&dataFinal={endDate.ToString(Constants.DateUriFormat)}&status={status}&offset={offset}&limit={limit}";
+			var requestUri = $"/SPSConsulta/GetOrderListPayment/{options.MerchantId}/boleto?token={authResp.TokenInfo.Token}&dataInicial={startDate.ToString(Constants.DateUriFormat)}&dataFinal={endDate.ToString(Constants.DateUriFormat)}&status={status}&offset={offset}&limit={limit}";
 
 			var resp = await performHttpRequestAsync(HttpMethod.Get, requestUri,
 				() => HttpGetClient.GetAsync(requestUri)

@@ -10,7 +10,7 @@ namespace Lacuna.BradescoIntegration.Models.Response {
 		[JsonProperty("status")]
 		public OpStatus Status { get; set; }
 		[JsonProperty("token")]
-		public TokenInfo Token { get; set; }
+		public TokenInfo TokenInfo { get; set; }
 		[JsonProperty("pedidos")]
 		public List<Order> Orders { get; set; }
 	}
