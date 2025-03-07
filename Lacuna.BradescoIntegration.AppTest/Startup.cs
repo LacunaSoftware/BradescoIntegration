@@ -52,10 +52,13 @@ namespace Lacuna.BradescoIntegration.AppTest {
 				);
 			});
 
+			
 			app.UseSpa(spa => {
 
 				if (env.IsDevelopment()) {
 					spa.Options.SourcePath = "ClientApp";
+
+					spa.UseProxyToSpaDevelopmentServer("http://localhost:4200");
 				}
 			});
 		}
