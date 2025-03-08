@@ -121,15 +121,15 @@ namespace Lacuna.BradescoIntegration {
 			var content = JsonConvert.DeserializeObject<GenericResponse>(responseContent);
 
 			if (!response.IsSuccessStatusCode) {
-				throw new BradescoIntegrationHttpException(HttpMethod.Get, new Uri(client.BaseAddress, requestUri), response.StatusCode, response.ReasonPhrase);
+				throw new BradescoIntegrationHttpException(HttpMethod.Get, new Uri(client.BaseAddress, requestUri), response.StatusCode, content.Status.Message);
 			}
-			if (content.Status.Code != "0" && content.Status.Code != "-501") {
-				throw new BradescoIntegrationApiException(HttpMethod.Get, new Uri(client.BaseAddress, requestUri), content.Status.Code, response.ReasonPhrase);
-			} else if (content.Status.Code != "0" && content.Status.Code != "-501" && content.Status.Code != "93005999") {
+			if (response.RequestMessage.Method == HttpMethod.Get && content.Status.Code != "0" && content.Status.Code != "-501") {
+				throw new BradescoIntegrationApiException(HttpMethod.Get, new Uri(client.BaseAddress, requestUri), content.Status.Code, content.Status.Message);
+			} else if (response.RequestMessage.Method == HttpMethod.Post && content.Status.Code != "0" && content.Status.Code != "-501" && content.Status.Code != "93005999") {
 
 				// Considerando como sucesso respostas com código 93005999, conforme manual:
 				// "93005999 - ² Para este retorno, não é necessária nenhuma ação pois o Registro será processado internamente"
-				throw new BradescoIntegrationApiException(HttpMethod.Post, new Uri(client.BaseAddress, requestUri), content.Status.Code, response.ReasonPhrase);
+				throw new BradescoIntegrationApiException(HttpMethod.Post, new Uri(client.BaseAddress, requestUri), content.Status.Code, content.Status.Message);
 			}
 		}
 
