@@ -1,12 +1,9 @@
 ﻿using Lacuna.BradescoIntegration.Models.Request;
 using Lacuna.BradescoIntegration.Models.Response;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -16,10 +13,12 @@ namespace Lacuna.BradescoIntegration {
 
 	public class BradescoClient {
 
+		private readonly ILogger<BradescoClient> logger;
 		private readonly BradescoIntegrationOptions options;
 		private readonly HttpClient client;
 
-		public BradescoClient(IHttpClientFactory clientFactory, BradescoIntegrationOptions bradescoOptions) {
+		public BradescoClient(ILogger<BradescoClient> logger, IHttpClientFactory clientFactory, BradescoIntegrationOptions bradescoOptions) {
+			this.logger = logger;
 			this.options = bradescoOptions;
 
 			client = clientFactory.CreateClient();
@@ -27,10 +26,6 @@ namespace Lacuna.BradescoIntegration {
 				options.IsSandbox ?
 				options.SandboxEndpoint : options.Endpoint);
 			client.DefaultRequestHeaders.Accept.Clear();
-
-			var authHeader = options.MerchantId + ":" + options.Key;
-			var authHeaderBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(authHeader));
-			client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authHeaderBase64);
 			client.DefaultRequestHeaders.Add("Accept-Charset", Constants.CharSet);
 		}
 
@@ -46,79 +41,32 @@ namespace Lacuna.BradescoIntegration {
 				throw new Exception("Boleto não é válido. Consulte as exceções internas", ex);
 			}
 
-			var data = JsonConvert.SerializeObject(boleto);
+			var data = new StringContent(JsonConvert.SerializeObject(boleto), Encoding.UTF8, Constants.MediaType);
 			var requestUri = "/apiboleto/transacao";
 
-			var httpResponse = await client.PostAsync(requestUri, new StringContent(data, Encoding.UTF8, Constants.MediaType));
-
-			var content = await httpResponse.Content.ReadAsStringAsync();
-			var response = JsonConvert.DeserializeObject<BankBilletGenerationResponse>(content,
-					 new IsoDateTimeConverter { DateTimeFormat = Constants.DateRetrievalFormat });
-
-			// Considerando como sucesso respostas com código 93005999, conforme manual:
-			// "93005999 - ² Para este retorno, não é necessária nenhuma ação pois o Registro será processado internamente"
-			if (response.Status.Code != "0" && response.Status.Code != "-501" && response.Status.Code != "93005999") {
-				throw new BradescoIntegrationApiException(HttpMethod.Post, new Uri(client.BaseAddress, requestUri), response.Status.Code, response.Status.Message);
-			}
-
-			return response;
+			return await sendHttpRequestAsync<BankBilletGenerationResponse>(HttpMethod.Post, requestUri, data);
 		}
 
 		/// <summary>
 		/// Retrieves a bank billet using Bradesco API
 		/// </summary>
 		public async Task<BradescoResponse> GetBankBilletAsync(string orderNumber) {
-
 			var authResp = await queryAuthenticationAsync();
-			if (authResp.TokenInfo == null || authResp.TokenInfo.Token == null) {
-				throw new Exception("No authentication token");
-			}
-
 			var requestUri = $"/SPSConsulta/GetOrderById/{options.MerchantId}?token={authResp.TokenInfo.Token}&orderId={orderNumber}";
-			var httpResponse = await client.GetAsync(requestUri);
 
-			var content = await httpResponse.Content.ReadAsStringAsync();
-			var response = JsonConvert.DeserializeObject<BradescoResponse>(content,
-					 new IsoDateTimeConverter { DateTimeFormat = Constants.DateRetrievalFormat });
-
-			if (response.Status.Code != "0" && response.Status.Code != "-501") {
-				throw new BradescoIntegrationApiException(HttpMethod.Get, new Uri(client.BaseAddress, requestUri), response.Status.Code, response.Status.Message);
-			}
-
-			return response;
+			return await sendHttpRequestAsync<BradescoResponse>(HttpMethod.Get, requestUri);
 		}
 
 		/// <summary>
 		/// Retrieves a list of bank billets using Bradesco API according to the parameters received. Difference of start and end dates cannot be greater than 6 days (Bradesco API constraint)
 		/// </summary>
 		public async Task<BradescoResponsePaginated> ListBankBilletAsync(DateTime startDate, DateTime endDate, int status = 0, int offset = 1, int limit = 100) {
-
-			if (endDate < startDate) {
-				throw new Exception("End date mt be greater than the star date.");
-			}
-
-			if (endDate - startDate > TimeSpan.FromDays(6)) {
-				throw new Exception("Difference of start and end dates cannot be greater than 6 days.");
-			}
+			verifyDate(startDate, endDate);
 
 			var authResp = await queryAuthenticationAsync();
-			if (authResp.TokenInfo == null || authResp.TokenInfo.Token == null) {
-				throw new Exception("No authentication token");
-			}
-
 			var requestUri = $"/SPSConsulta/GetOrderListPayment/{options.MerchantId}/boleto?token={authResp.TokenInfo.Token}&dataInicial={startDate.ToString(Constants.DateUriFormat)}&dataFinal={endDate.ToString(Constants.DateUriFormat)}&status={status}&offset={offset}&limit={limit}";
 
-			var httpResponse = await client.GetAsync(requestUri);
-
-			var content = await httpResponse.Content.ReadAsStringAsync();
-			var response = JsonConvert.DeserializeObject<BradescoResponsePaginated>(content,
-					 new IsoDateTimeConverter { DateTimeFormat = Constants.DateRetrievalFormat });
-
-			if (response.Status.Code != "0" && response.Status.Code != "-501") {
-				throw new BradescoIntegrationApiException(HttpMethod.Get, new Uri(client.BaseAddress, requestUri), response.Status.Code, response.Status.Message);
-			}
-
-			return response;
+			return await sendHttpRequestAsync<BradescoResponsePaginated>(HttpMethod.Get, requestUri);
 		}
 
 		/// <summary>
@@ -126,30 +74,73 @@ namespace Lacuna.BradescoIntegration {
 		/// </summary>
 		private async Task<BradescoResponse> queryAuthenticationAsync() {
 			var requestUri = $"/SPSConsulta/Authentication/{options.MerchantId}";
-			var httpResponse = await client.GetAsync(requestUri);
 
-			if (!httpResponse.IsSuccessStatusCode) {
-				throw new BradescoIntegrationHttpException(HttpMethod.Get, new Uri(client.BaseAddress, requestUri), httpResponse.StatusCode, httpResponse.ReasonPhrase);
+			var response = await sendHttpRequestAsync<BradescoResponse>(HttpMethod.Get, requestUri);
+			if (response.TokenInfo == null || response.TokenInfo.Token == null) {
+				throw new Exception("No authentication token");
 			}
-
-			var content = await httpResponse.Content.ReadAsStringAsync();
-			var response = JsonConvert.DeserializeObject<BradescoResponse>(content, new IsoDateTimeConverter { DateTimeFormat = Constants.DateRetrievalFormat });
 			return response;
 		}
-		
-		private async Task<HttpResponseMessage> performHttpRequestAsync(HttpMethod verb, string requestUri, Func<Task<HttpResponseMessage>> asyncFunc) {
-			var uri = new Uri(client.BaseAddress, requestUri);
+
+		private async Task<T> sendHttpRequestAsync<T>(HttpMethod method, string endpoint, HttpContent content = null) {
+			setAuthorizationHeader(method);
+
 			HttpResponseMessage httpResponse;
-			try {
-				httpResponse = await asyncFunc();
-			} catch (Exception ex) {
-				throw new BradescoIntegrationUnreachableException(verb, uri, ex);
+
+			if (method == HttpMethod.Get) {
+				httpResponse = await client.GetAsync(endpoint);
+			} else if (method == HttpMethod.Post) {
+				httpResponse = await client.PostAsync(endpoint, content);
+			} else {
+				throw new NotSupportedException($"HTTP method {method} not supported.");
 			}
-			if (!httpResponse.IsSuccessStatusCode) {
-				throw new BradescoIntegrationHttpException(verb, uri, httpResponse.StatusCode, httpResponse.ReasonPhrase);
-			}
-			return httpResponse;
+
+			await handleErrorResponseAsync(httpResponse, endpoint);
+
+			var responseContent = await httpResponse.Content.ReadAsStringAsync();
+			return JsonConvert.DeserializeObject<T>(responseContent, new IsoDateTimeConverter { DateTimeFormat = Constants.DateRetrievalFormat });
 		}
 
+		private void setAuthorizationHeader(HttpMethod method) {
+
+			if (method == HttpMethod.Get) {
+				client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+					"Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes(options.Email + ":" + options.Key)));
+
+			} else if (method == HttpMethod.Post) {
+				client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+					"Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes(options.MerchantId + ":" + options.Key)));
+			} else {
+				throw new NotSupportedException($"HTTP method {method} not supported.");
+			}
+
+		}
+
+		private async Task handleErrorResponseAsync(HttpResponseMessage response, string requestUri) {
+			var responseContent = await response.Content.ReadAsStringAsync();
+			var content = JsonConvert.DeserializeObject<GenericResponse>(responseContent);
+
+			if (!response.IsSuccessStatusCode) {
+				throw new BradescoIntegrationHttpException(HttpMethod.Get, new Uri(client.BaseAddress, requestUri), response.StatusCode, response.ReasonPhrase);
+			}
+			if (content.Status.Code != "0" && content.Status.Code != "-501") {
+				throw new BradescoIntegrationApiException(HttpMethod.Get, new Uri(client.BaseAddress, requestUri), content.Status.Code, response.ReasonPhrase);
+			} else if (content.Status.Code != "0" && content.Status.Code != "-501" && content.Status.Code != "93005999") {
+
+				// Considerando como sucesso respostas com código 93005999, conforme manual:
+				// "93005999 - ² Para este retorno, não é necessária nenhuma ação pois o Registro será processado internamente"
+				throw new BradescoIntegrationApiException(HttpMethod.Post, new Uri(client.BaseAddress, requestUri), content.Status.Code, response.ReasonPhrase);
+			}
+		}
+
+		private void verifyDate(DateTime startDate, DateTime endDate) {
+			if (endDate < startDate) {
+				throw new Exception("End date mt be greater than the star date.");
+			}
+
+			if (endDate - startDate > TimeSpan.FromDays(6)) {
+				throw new Exception("Difference of start and end dates cannot be greater than 6 days.");
+			}
+		}
 	}
 }
