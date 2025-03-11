@@ -61,7 +61,10 @@ namespace Lacuna.BradescoIntegration {
 		/// Retrieves a list of bank billets using Bradesco API according to the parameters received. Difference of start and end dates cannot be greater than 6 days (Bradesco API constraint)
 		/// </summary>
 		public async Task<BradescoResponsePaginated> ListBankBilletAsync(DateTime startDate, DateTime endDate, int status = 0, int offset = 1, int limit = 100) {
-			verifyDate(startDate, endDate);
+			if (!verifyDate(startDate, endDate)) {
+				logger.LogInformation("Date validation failed");
+				return new BradescoResponsePaginated();
+			}
 
 			var authResp = await queryAuthenticationAsync();
 			var requestUri = $"/SPSConsulta/GetOrderListPayment/{options.MerchantId}/boleto?token={authResp.TokenInfo.Token}&dataInicial={startDate.ToString(Constants.DateUriFormat)}&dataFinal={endDate.ToString(Constants.DateUriFormat)}&status={status}&offset={offset}&limit={limit}";
@@ -133,14 +136,17 @@ namespace Lacuna.BradescoIntegration {
 			}
 		}
 
-		private void verifyDate(DateTime startDate, DateTime endDate) {
+		private bool verifyDate(DateTime startDate, DateTime endDate) {
 			if (endDate < startDate) {
-				throw new Exception("End date mt be greater than the star date.");
+				logger.LogInformation("End date should be greater than the star date.");
+				return false;
 			}
 
 			if (endDate - startDate > TimeSpan.FromDays(6)) {
-				throw new Exception("Difference of start and end dates cannot be greater than 6 days.");
+				logger.LogInformation("Difference of start and end dates cannot be greater than 6 days.");
+				return false;
 			}
+			return true;
 		}
 	}
 }
