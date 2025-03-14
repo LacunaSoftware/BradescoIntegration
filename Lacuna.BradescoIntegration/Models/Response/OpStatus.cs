@@ -1,7 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Lacuna.BradescoIntegration.Models.Response {
 	public class OpStatus {
@@ -16,5 +13,12 @@ namespace Lacuna.BradescoIntegration.Models.Response {
 		/// </summary>
 		[JsonProperty("mensagem")]
 		public string Message { get; set; }
+
+		/// <summary>
+		/// Apresentado quando houver um erro associado com a geração do boleto, com a finalidade de apresentar maiores
+		/// informações a respeito do problema.
+		/// </summary>
+		[JsonProperty("detalhes")]
+		public string Details { get; set; } = string.Empty;
 	}
 }
