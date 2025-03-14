@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Lacuna.BradescoIntegration {
+﻿namespace Lacuna.BradescoIntegration {
 	public static class Constants {
 		public static readonly string MediaType = "application/json";
 		public static readonly string CharSet = "UTF-8";

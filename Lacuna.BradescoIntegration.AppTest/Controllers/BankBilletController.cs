@@ -1,11 +1,7 @@
 ﻿using Lacuna.BradescoIntegration.AppTest.Classes;
-using Lacuna.BradescoIntegration.Models.Request;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Lacuna.BradescoIntegration.AppTest.Controllers {
