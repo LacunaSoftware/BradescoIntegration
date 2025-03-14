@@ -1,14 +1,8 @@
 ﻿using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lacuna.BradescoIntegration.Models.Response {
-	public class BradescoResponse {
-		[JsonProperty("status")]
-		public OpStatus Status { get; set; }
+	public class BradescoResponse : GenericResponse {
 		[JsonProperty("token")]
 		public TokenInfo TokenInfo { get; set; }
 		[JsonProperty("pedidos")]
