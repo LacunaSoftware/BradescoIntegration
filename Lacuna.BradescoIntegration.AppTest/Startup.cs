@@ -13,7 +13,6 @@ namespace Lacuna.BradescoIntegration.AppTest {
 
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services) {
-			//services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 			services.AddControllersWithViews();
 			// Configuring the Bradesco Integration Options from the appsettings
 			services.Configure<BradescoIntegrationOptions>(Configuration.GetSection("Bradesco"));
