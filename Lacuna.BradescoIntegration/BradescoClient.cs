@@ -62,11 +62,13 @@ namespace Lacuna.BradescoIntegration {
 		/// </summary>
 		public async Task<BradescoResponsePaginated> ListBankBilletAsync(DateTime startDate, DateTime endDate, int status = 0, int offset = 1, int limit = 100) {
 			if (!verifyDate(startDate, endDate)) {
-				logger.LogInformation("Date validation failed");
 				return new BradescoResponsePaginated();
 			}
 
 			var authResp = await queryAuthenticationAsync();
+			if (authResp == null) {
+				return new BradescoResponsePaginated();
+			}
 			var requestUri = $"/SPSConsulta/GetOrderListPayment/{options.MerchantId}/boleto?token={authResp.TokenInfo.Token}&dataInicial={startDate.ToString(Constants.DateUriFormat)}&dataFinal={endDate.ToString(Constants.DateUriFormat)}&status={status}&offset={offset}&limit={limit}";
 
 			return await sendHttpRequestAsync<BradescoResponsePaginated>(HttpMethod.Get, requestUri);
@@ -80,7 +82,8 @@ namespace Lacuna.BradescoIntegration {
 
 			var response = await sendHttpRequestAsync<BradescoResponse>(HttpMethod.Get, requestUri);
 			if (response.TokenInfo == null || response.TokenInfo.Token == null) {
-				throw new Exception("No authentication token");
+				logger.LogDebug($"Token retrieving failed. {JsonConvert.SerializeObject(response)}");
+				return null;
 			}
 			return response;
 		}
@@ -138,7 +141,7 @@ namespace Lacuna.BradescoIntegration {
 
 		private bool verifyDate(DateTime startDate, DateTime endDate) {
 			if (endDate < startDate) {
-				logger.LogInformation("End date should be greater than the star date.");
+				logger.LogInformation("End date should be greater than the start date.");
 				return false;
 			}
 
