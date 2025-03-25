@@ -1,5 +1,4 @@
 ﻿#if NET6_0_OR_GREATER
-
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -12,9 +11,10 @@ namespace Lacuna.BradescoIntegration {
 			if (action != null) {
 				services.Configure(action);
 			}
+
 			services.AddTransient<BradescoClient, BradescoClientAspNetCore>();
 			services.AddSingleton<BradescoIntegrationOptions>();
-			services.AddHttpClient<BradescoClientAspNetCore>();
+
 			return services;
 		}
 	}
