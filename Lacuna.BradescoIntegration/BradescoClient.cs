@@ -49,6 +49,9 @@ namespace Lacuna.BradescoIntegration {
 		/// </summary>
 		public async Task<BradescoResponse> GetBankBilletAsync(string orderNumber) {
 			var authResp = await queryAuthenticationAsync();
+			if (authResp == null || authResp.TokenInfo == null || authResp.TokenInfo.Token == null) {
+				throw new Exception("No authentication token");
+			}
 			var requestUri = $"/SPSConsulta/GetOrderById/{options.MerchantId}?token={authResp.TokenInfo.Token}&orderId={orderNumber}";
 
 			var response = await sendHttpRequestAsync(HttpMethod.Get, requestUri);
