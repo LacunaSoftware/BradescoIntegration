@@ -74,12 +74,12 @@ namespace Lacuna.BradescoIntegration {
 		/// <summary>
 		/// Retrieves an authentication token for the Bradesco API GET operations
 		/// </summary>
-		private async Task<BradescoResponse> queryAuthenticationAsync() {
+		private async Task<GenericResponse> queryAuthenticationAsync() {
 			var requestUri = $"/SPSConsulta/Authentication/{options.MerchantId}";
 
 			var httpResponse = await sendHttpRequestAsync(HttpMethod.Get, requestUri);
 			var responseContent = await httpResponse.Content.ReadAsStringAsync();
-			var response = JsonConvert.DeserializeObject<BradescoResponse>(responseContent, new IsoDateTimeConverter { DateTimeFormat = Constants.DateRetrievalFormat });
+			var response = JsonConvert.DeserializeObject<GenericResponse>(responseContent, new IsoDateTimeConverter { DateTimeFormat = Constants.DateRetrievalFormat });
 			if (!httpResponse.IsSuccessStatusCode) {
 				logger.LogDebug($"Token retrieving failed. {responseContent}");
 				return null;
@@ -106,7 +106,7 @@ namespace Lacuna.BradescoIntegration {
 		}
 
 		private void handleErrorResponseAsync(HttpResponseMessage response, string responseContent, string requestUri) {
-			var content = JsonConvert.DeserializeObject<GenericResponse>(responseContent);
+			var content = JsonConvert.DeserializeObject<GenericResponse>(responseContent, new IsoDateTimeConverter { DateTimeFormat = Constants.DateRetrievalFormat });
 
 			if (!response.IsSuccessStatusCode) {
 				throw new BradescoIntegrationHttpException(HttpMethod.Get, new Uri(getClient.BaseAddress, requestUri), response.StatusCode, content.Status.Message);
