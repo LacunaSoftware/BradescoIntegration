@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 
 namespace Lacuna.BradescoIntegration.Models.Response {
-	public class BankBilletGenerationResponse : GenericResponse {
+	public class BankBilletGenerationResponse {
 		/// <summary>
 		/// Identificador do estabelecimento fornecido pelo Bradesco
 		/// </summary>
