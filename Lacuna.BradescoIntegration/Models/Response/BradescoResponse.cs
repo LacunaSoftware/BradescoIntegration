@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 
 namespace Lacuna.BradescoIntegration.Models.Response {
-	public class BradescoResponse : GenericResponse {
-		[JsonProperty("token")]
-		public TokenInfo TokenInfo { get; set; }
+	public class BradescoResponse {
 		[JsonProperty("pedidos")]
 		public List<Order> Orders { get; set; }
+		[JsonProperty("status")]
+		public Status Status { get; set; }
 	}
 }
