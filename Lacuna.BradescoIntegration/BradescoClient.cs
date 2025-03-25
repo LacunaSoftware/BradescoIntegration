@@ -82,11 +82,13 @@ namespace Lacuna.BradescoIntegration {
 
 			var httpResponse = await sendHttpRequestAsync(HttpMethod.Get, requestUri);
 			var responseContent = await httpResponse.Content.ReadAsStringAsync();
-			var response = JsonConvert.DeserializeObject<GenericResponse>(responseContent, new IsoDateTimeConverter { DateTimeFormat = Constants.DateRetrievalFormat });
+
 			if (!httpResponse.IsSuccessStatusCode) {
 				logger.LogDebug($"Token retrieving failed. {responseContent}");
 				return null;
 			}
+
+			var response = JsonConvert.DeserializeObject<GenericResponse>(responseContent, new IsoDateTimeConverter { DateTimeFormat = Constants.DateRetrievalFormat });
 			return response;
 		}
 
