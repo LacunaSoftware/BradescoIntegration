@@ -1,5 +1,4 @@
-﻿#if NET6_0_OR_GREATER
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace Lacuna.BradescoIntegration {
@@ -19,5 +18,3 @@ namespace Lacuna.BradescoIntegration {
 		}
 	}
 }
-
-#endif
