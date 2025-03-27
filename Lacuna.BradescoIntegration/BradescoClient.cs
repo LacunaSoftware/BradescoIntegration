@@ -95,7 +95,7 @@ namespace Lacuna.BradescoIntegration {
 				? "BradescoIntegration:GetClient"
 				: "BradescoIntegration:PostClient";
 
-			var client = clientFactory.CreateClient(clientName);
+			using var client = clientFactory.CreateClient(clientName);
 
 			var httpResponse = method == HttpMethod.Get
 				? await client.GetAsync(endpoint)
