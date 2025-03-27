@@ -67,7 +67,7 @@ namespace Lacuna.BradescoIntegration {
 			}
 			var requestUri = $"/SPSConsulta/GetOrderListPayment/{options.MerchantId}/boleto?token={authResp.TokenInfo.Token}&dataInicial={startDate.ToString(Constants.DateUriFormat)}&dataFinal={endDate.ToString(Constants.DateUriFormat)}&status={status}&offset={offset}&limit={limit}";
 
-			var response = await sendHttpRequestAsync(HttpMethod.Get, requestUri);
+			var response = await sendHttpRequestAsync(HttpMethod.Put, requestUri);
 			return JsonConvert.DeserializeObject<BradescoResponsePaginated>(await response.Content.ReadAsStringAsync(), new IsoDateTimeConverter { DateTimeFormat = Constants.DateRetrievalFormat });
 		}
 
@@ -90,6 +90,9 @@ namespace Lacuna.BradescoIntegration {
 		}
 
 		private async Task<HttpResponseMessage> sendHttpRequestAsync(HttpMethod method, string endpoint, HttpContent content = null) {
+			if (method != HttpMethod.Get && method != HttpMethod.Post) {
+				throw new NotSupportedException($"HTTP method {method} not supported.");
+			}
 
 			var clientName = method == HttpMethod.Get
 				? "BradescoIntegration:GetClient"
