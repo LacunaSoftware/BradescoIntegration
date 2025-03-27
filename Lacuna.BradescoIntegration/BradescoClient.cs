@@ -14,15 +14,12 @@ namespace Lacuna.BradescoIntegration {
 
 		private readonly ILogger<BradescoClient> logger;
 		private readonly BradescoIntegrationOptions options;
-		private readonly HttpClient getClient;
-		private readonly HttpClient postClient;
+		private readonly IHttpClientFactory clientFactory;
 
 		public BradescoClient(ILogger<BradescoClient> logger, IHttpClientFactory clientFactory, BradescoIntegrationOptions bradescoOptions) {
 			this.logger = logger;
 			this.options = bradescoOptions;
-
-			getClient = clientFactory.CreateClient("GetClient");
-			postClient = clientFactory.CreateClient("PostClient");
+			this.clientFactory = clientFactory;
 		}
 
 		/// <summary>
@@ -94,35 +91,35 @@ namespace Lacuna.BradescoIntegration {
 
 		private async Task<HttpResponseMessage> sendHttpRequestAsync(HttpMethod method, string endpoint, HttpContent content = null) {
 
-			HttpResponseMessage httpResponse;
+			var clientName = method == HttpMethod.Get
+				? "BradescoIntegration:GetClient"
+				: "BradescoIntegration:PostClient";
 
-			if (method == HttpMethod.Get) {
-				httpResponse = await getClient.GetAsync(endpoint);
-			} else if (method == HttpMethod.Post) {
-				httpResponse = await postClient.PostAsync(endpoint, content);
-			} else {
-				throw new NotSupportedException($"HTTP method {method} not supported.");
-			}
+			var client = clientFactory.CreateClient(clientName);
+
+			var httpResponse = method == HttpMethod.Get
+				? await client.GetAsync(endpoint)
+				: await client.PostAsync(endpoint, content);
 
 			var responseContent = await httpResponse.Content.ReadAsStringAsync();
-			handleErrorResponseAsync(httpResponse, responseContent, endpoint);
+			handleErrorResponseAsync(httpResponse, client, responseContent, endpoint);
 
 			return httpResponse;
 		}
 
-		private void handleErrorResponseAsync(HttpResponseMessage response, string responseContent, string requestUri) {
+		private void handleErrorResponseAsync(HttpResponseMessage response, HttpClient client, string responseContent, string requestUri) {
 			var content = JsonConvert.DeserializeObject<GenericResponse>(responseContent, new IsoDateTimeConverter { DateTimeFormat = Constants.DateRetrievalFormat });
 
 			if (!response.IsSuccessStatusCode) {
-				throw new BradescoIntegrationHttpException(HttpMethod.Get, new Uri(getClient.BaseAddress, requestUri), response.StatusCode, content.Status.Message);
+				throw new BradescoIntegrationHttpException(HttpMethod.Get, new Uri(client.BaseAddress, requestUri), response.StatusCode, content.Status.Message);
 			}
 			if (response.RequestMessage.Method == HttpMethod.Get && content.Status.Code != "0" && content.Status.Code != "-501") {
-				throw new BradescoIntegrationApiException(HttpMethod.Get, new Uri(getClient.BaseAddress, requestUri), content.Status.Code, content.Status.Message);
+				throw new BradescoIntegrationApiException(HttpMethod.Get, new Uri(client.BaseAddress, requestUri), content.Status.Code, content.Status.Message);
 			} else if (response.RequestMessage.Method == HttpMethod.Post && content.Status.Code != "0" && content.Status.Code != "-501" && content.Status.Code != "93005999") {
 
 				// Considerando como sucesso respostas com código 93005999, conforme manual:
 				// "93005999 - ² Para este retorno, não é necessária nenhuma ação pois o Registro será processado internamente"
-				throw new BradescoIntegrationApiException(HttpMethod.Post, new Uri(postClient.BaseAddress, requestUri), content.Status.Code, content.Status.Message);
+				throw new BradescoIntegrationApiException(HttpMethod.Post, new Uri(client.BaseAddress, requestUri), content.Status.Code, content.Status.Message);
 			}
 			logger.LogDebug($"handleErrorResponseAsync: {responseContent}");
 		}
