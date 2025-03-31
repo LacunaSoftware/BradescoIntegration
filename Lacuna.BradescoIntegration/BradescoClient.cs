@@ -90,8 +90,8 @@ namespace Lacuna.BradescoIntegration {
 			}
 
 			var clientName = method == HttpMethod.Get
-				? "BradescoIntegration:GetClient"
-				: "BradescoIntegration:PostClient";
+				? Constants.FactoryGetClientName
+				: Constants.FactoryPostClientName;
 
 			using var client = clientFactory.CreateClient(clientName);
 
@@ -101,6 +101,7 @@ namespace Lacuna.BradescoIntegration {
 
 			var responseContent = await httpResponse.Content.ReadAsStringAsync();
 			handleErrorResponseAsync(httpResponse, client, responseContent, endpoint);
+
 			var result = JsonConvert.DeserializeObject<T>(
 				responseContent,
 				new IsoDateTimeConverter { DateTimeFormat = Constants.DateRetrievalFormat });

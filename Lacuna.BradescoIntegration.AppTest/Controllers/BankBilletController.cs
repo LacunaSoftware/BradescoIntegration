@@ -1,4 +1,5 @@
 ﻿using Lacuna.BradescoIntegration.AppTest.Classes;
+using Lacuna.BradescoIntegration.Models.Request;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System;
@@ -25,10 +26,15 @@ namespace Lacuna.BradescoIntegration.AppTest.Controllers {
 			return Ok(retorno);
 		}
 
+		[HttpPost("v2")]
+		public async Task<IActionResult> BoletoTestAsync([FromBody] BankBilletRequest data) {
+			var retorno = await bradescoClient.CreateBankBilletAsync(data);
+			return Ok(retorno);
+		}
+
 		[HttpGet("{id}")]
-		public async Task<IActionResult> GetBoletoTestAsync(string Id) {
-			var now = DateTime.Now;
-			var retorno = await bradescoClient.GetBankBilletAsync(Id);
+		public async Task<IActionResult> GetBoletoTestAsync(string id) {
+			var retorno = await bradescoClient.GetBankBilletAsync(id);
 			return Ok(retorno);
 		}
 

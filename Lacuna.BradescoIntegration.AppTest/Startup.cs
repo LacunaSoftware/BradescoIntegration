@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -26,6 +27,9 @@ namespace Lacuna.BradescoIntegration.AppTest {
 			services.AddSpaStaticFiles(configuration => {
 				configuration.RootPath = "ClientApp/dist";
 			});
+
+			services.AddEndpointsApiExplorer();
+			services.AddSwaggerGen();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -40,8 +44,9 @@ namespace Lacuna.BradescoIntegration.AppTest {
 
 			app.UseHttpsRedirection();
 			app.UseStaticFiles();
-			app.UseSpaStaticFiles();
 
+			app.UseSwagger();
+			app.UseSwaggerUI();
 			app.UseRouting();
 
 			app.UseEndpoints(endpoints => {
@@ -49,16 +54,6 @@ namespace Lacuna.BradescoIntegration.AppTest {
 					name: "default",
 					pattern: "{controller}/{action=Index}/{id?}"
 				);
-			});
-
-
-			app.UseSpa(spa => {
-
-				if (env.IsDevelopment()) {
-					spa.Options.SourcePath = "ClientApp";
-
-					spa.UseProxyToSpaDevelopmentServer("http://localhost:4200");
-				}
 			});
 		}
 	}

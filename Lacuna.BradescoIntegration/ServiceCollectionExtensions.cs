@@ -16,7 +16,7 @@ namespace Lacuna.BradescoIntegration {
 				services.Configure(action);
 			}
 
-			services.AddHttpClient("BradescoIntegration:GetClient")
+			services.AddHttpClient(Constants.FactoryGetClientName)
 				.ConfigureHttpClient((serviceProvider, c) => {
 					var options = serviceProvider.GetRequiredService<IOptions<BradescoIntegrationOptions>>().Value;
 
@@ -31,7 +31,7 @@ namespace Lacuna.BradescoIntegration {
 					);
 				});
 
-			services.AddHttpClient("BradescoIntegration:PostClient")
+			services.AddHttpClient(Constants.FactoryPostClientName)
 				.ConfigureHttpClient((serviceProvider, c) => {
 					var options = serviceProvider.GetRequiredService<IOptions<BradescoIntegrationOptions>>().Value;
 
