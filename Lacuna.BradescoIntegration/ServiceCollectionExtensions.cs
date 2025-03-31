@@ -47,7 +47,6 @@ namespace Lacuna.BradescoIntegration {
 			});
 
 			services.AddSingleton<BradescoClient, BradescoClientAspNetCore>();
-			services.AddSingleton<BradescoIntegrationOptions>();
 
 			return services;
 		}

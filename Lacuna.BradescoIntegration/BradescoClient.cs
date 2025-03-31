@@ -37,8 +37,7 @@ namespace Lacuna.BradescoIntegration {
 			var data = new StringContent(JsonConvert.SerializeObject(boleto), Encoding.UTF8, Constants.MediaType);
 			var requestUri = "/apiboleto/transacao";
 
-			var response = await sendHttpRequestAsync(HttpMethod.Post, requestUri, data);
-			return JsonConvert.DeserializeObject<BankBilletGenerationResponse>(await response.Content.ReadAsStringAsync(), new IsoDateTimeConverter { DateTimeFormat = Constants.DateRetrievalFormat });
+			return await sendHttpRequestAsync<BankBilletGenerationResponse>(HttpMethod.Post, requestUri, data);
 		}
 
 		/// <summary>
@@ -51,8 +50,7 @@ namespace Lacuna.BradescoIntegration {
 			}
 			var requestUri = $"/SPSConsulta/GetOrderById/{options.MerchantId}?token={authResp.TokenInfo.Token}&orderId={orderNumber}";
 
-			var response = await sendHttpRequestAsync(HttpMethod.Get, requestUri);
-			return JsonConvert.DeserializeObject<BradescoResponse>(await response.Content.ReadAsStringAsync(), new IsoDateTimeConverter { DateTimeFormat = Constants.DateRetrievalFormat });
+			return await sendHttpRequestAsync<BradescoResponse>(HttpMethod.Get, requestUri);
 		}
 
 		/// <summary>
@@ -67,8 +65,7 @@ namespace Lacuna.BradescoIntegration {
 			}
 			var requestUri = $"/SPSConsulta/GetOrderListPayment/{options.MerchantId}/boleto?token={authResp.TokenInfo.Token}&dataInicial={startDate.ToString(Constants.DateUriFormat)}&dataFinal={endDate.ToString(Constants.DateUriFormat)}&status={status}&offset={offset}&limit={limit}";
 
-			var response = await sendHttpRequestAsync(HttpMethod.Put, requestUri);
-			return JsonConvert.DeserializeObject<BradescoResponsePaginated>(await response.Content.ReadAsStringAsync(), new IsoDateTimeConverter { DateTimeFormat = Constants.DateRetrievalFormat });
+			return await sendHttpRequestAsync<BradescoResponsePaginated>(HttpMethod.Get, requestUri);
 		}
 
 		/// <summary>
@@ -77,19 +74,17 @@ namespace Lacuna.BradescoIntegration {
 		private async Task<GenericResponse> queryAuthenticationAsync() {
 			var requestUri = $"/SPSConsulta/Authentication/{options.MerchantId}";
 
-			var httpResponse = await sendHttpRequestAsync(HttpMethod.Get, requestUri);
-			var responseContent = await httpResponse.Content.ReadAsStringAsync();
-
-			if (!httpResponse.IsSuccessStatusCode) {
-				logger.LogDebug($"Token retrieving failed. {responseContent}");
-				return null;
-			}
-
-			var response = JsonConvert.DeserializeObject<GenericResponse>(responseContent, new IsoDateTimeConverter { DateTimeFormat = Constants.DateRetrievalFormat });
-			return response;
+			return await sendHttpRequestAsync<GenericResponse>(
+				HttpMethod.Get,
+				requestUri,
+				afterDeserialization: (_, content, result) => {
+					if (result == null || result.TokenInfo == null || result.TokenInfo.Token == null) {
+						logger.LogError($"Unexpected null token: {content}");
+					}
+				});
 		}
 
-		private async Task<HttpResponseMessage> sendHttpRequestAsync(HttpMethod method, string endpoint, HttpContent content = null) {
+		private async Task<T> sendHttpRequestAsync<T>(HttpMethod method, string endpoint, HttpContent content = null, Action<HttpResponseMessage, string, T> afterDeserialization = null) {
 			if (method != HttpMethod.Get && method != HttpMethod.Post) {
 				throw new NotSupportedException($"HTTP method {method} not supported.");
 			}
@@ -106,25 +101,33 @@ namespace Lacuna.BradescoIntegration {
 
 			var responseContent = await httpResponse.Content.ReadAsStringAsync();
 			handleErrorResponseAsync(httpResponse, client, responseContent, endpoint);
+			var result = JsonConvert.DeserializeObject<T>(
+				responseContent,
+				new IsoDateTimeConverter { DateTimeFormat = Constants.DateRetrievalFormat });
 
-			return httpResponse;
+			if (afterDeserialization != null)
+				afterDeserialization(httpResponse, responseContent, result);
+
+			return result;
 		}
 
 		private void handleErrorResponseAsync(HttpResponseMessage response, HttpClient client, string responseContent, string requestUri) {
 			var content = JsonConvert.DeserializeObject<GenericResponse>(responseContent, new IsoDateTimeConverter { DateTimeFormat = Constants.DateRetrievalFormat });
 
+			if (content == null) {
+				throw new Exception($"Unexpected content deserialization: {responseContent}");
+			}
 			if (!response.IsSuccessStatusCode) {
+				logger.LogError($"Not sucessfull status code {response.StatusCode}: {responseContent}");
 				throw new BradescoIntegrationHttpException(HttpMethod.Get, new Uri(client.BaseAddress, requestUri), response.StatusCode, content.Status.Message);
 			}
 			if (response.RequestMessage.Method == HttpMethod.Get && content.Status.Code != "0" && content.Status.Code != "-501") {
 				throw new BradescoIntegrationApiException(HttpMethod.Get, new Uri(client.BaseAddress, requestUri), content.Status.Code, content.Status.Message);
 			} else if (response.RequestMessage.Method == HttpMethod.Post && content.Status.Code != "0" && content.Status.Code != "-501" && content.Status.Code != "93005999") {
-
 				// Considerando como sucesso respostas com código 93005999, conforme manual:
 				// "93005999 - ² Para este retorno, não é necessária nenhuma ação pois o Registro será processado internamente"
 				throw new BradescoIntegrationApiException(HttpMethod.Post, new Uri(client.BaseAddress, requestUri), content.Status.Code, content.Status.Message);
 			}
-			logger.LogDebug($"handleErrorResponseAsync: {responseContent}");
 		}
 
 		private void verifyDate(DateTime startDate, DateTime endDate) {

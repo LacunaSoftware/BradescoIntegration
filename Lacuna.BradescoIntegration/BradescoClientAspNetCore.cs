@@ -1,6 +1,4 @@
-﻿#if NET6_0_OR_GREATER
-
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net.Http;
 
@@ -12,5 +10,3 @@ namespace Lacuna.BradescoIntegration {
 		}
 	}
 }
-
-#endif
