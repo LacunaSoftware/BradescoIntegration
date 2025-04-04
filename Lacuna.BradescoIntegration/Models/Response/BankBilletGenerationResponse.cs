@@ -20,9 +20,6 @@ namespace Lacuna.BradescoIntegration.Models.Response {
 		[JsonProperty("boleto")]
 		public BradescoBankBillet Boleto { get; set; }
 
-		/// <summary>
-		/// Dados do status da requisição
-		/// </summary>
 		[JsonProperty("status")]
 		public Status Status { get; set; }
 	}

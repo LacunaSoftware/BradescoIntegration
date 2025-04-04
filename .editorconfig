@@ -18,6 +18,11 @@ insert_final_newline = true
 indent_style = space
 indent_size = 2
 
+[*.yml]
+# Indent with 2 spaces to match Visual Studio edits on the files
+indent_style = space
+indent_size = 2
+
 # C# files
 [*.cs]
 
@@ -173,3 +178,4 @@ dotnet_naming_rule.private_members_must_be_camel_case.severity = warning
 dotnet_naming_rule.private_members_must_be_camel_case.symbols  = private_members
 dotnet_naming_rule.private_members_must_be_camel_case.style    = camel_case_style
 # NOTE: this rule is a sort of "catch all" rule and therefore must appear after any rules with more specific symbol scopes
+dotnet_diagnostic.IDE0005.severity = error

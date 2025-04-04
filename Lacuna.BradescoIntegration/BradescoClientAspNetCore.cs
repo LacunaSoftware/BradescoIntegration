@@ -1,17 +1,12 @@
-﻿#if NETSTANDARD2_0
-
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Net.Http;
 
 namespace Lacuna.BradescoIntegration {
 
 	internal class BradescoClientAspNetCore : BradescoClient {
 
-		public BradescoClientAspNetCore(IOptions<BradescoIntegrationOptions> options): base(options.Value) {
+		public BradescoClientAspNetCore(ILogger<BradescoClient> logger, IHttpClientFactory clientFactory, IOptions<BradescoIntegrationOptions> options) : base(logger, clientFactory, options.Value) {
 		}
 	}
 }
-
-#endif

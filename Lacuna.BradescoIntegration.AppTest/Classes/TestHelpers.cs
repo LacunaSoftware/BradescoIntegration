@@ -2,8 +2,6 @@
 using Lacuna.BradescoIntegration.Request;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Lacuna.BradescoIntegration.AppTest.Classes {
 	public class TestHelpers {

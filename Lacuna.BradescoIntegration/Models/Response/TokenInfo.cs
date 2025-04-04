@@ -1,7 +1,5 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Lacuna.BradescoIntegration.Models.Response {
 	public class TokenInfo {

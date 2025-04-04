@@ -1,9 +1,5 @@
-using Lacuna.BradescoIntegration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,8 +13,7 @@ namespace Lacuna.BradescoIntegration.AppTest {
 
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services) {
-			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-
+			services.AddControllersWithViews();
 			// Configuring the Bradesco Integration Options from the appsettings
 			services.Configure<BradescoIntegrationOptions>(Configuration.GetSection("Bradesco"));
 			// Creating the Bradesco Integration Client as a Singleton and available for the Services and controllers to use it (Asp.Net Core configuration library option)
@@ -28,6 +23,9 @@ namespace Lacuna.BradescoIntegration.AppTest {
 			services.AddSpaStaticFiles(configuration => {
 				configuration.RootPath = "ClientApp/dist";
 			});
+
+			services.AddEndpointsApiExplorer();
+			services.AddSwaggerGen();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -42,23 +40,16 @@ namespace Lacuna.BradescoIntegration.AppTest {
 
 			app.UseHttpsRedirection();
 			app.UseStaticFiles();
-			app.UseSpaStaticFiles();
 
-			app.UseMvc(routes => {
-				routes.MapRoute(
-					   name: "default",
-					   template: "{controller}/{action=Index}/{id?}");
-			});
+			app.UseSwagger();
+			app.UseSwaggerUI();
+			app.UseRouting();
 
-			app.UseSpa(spa => {
-				// To learn more about options for serving an Angular SPA from ASP.NET Core,
-				// see https://go.microsoft.com/fwlink/?linkid=864501
-
-				spa.Options.SourcePath = "ClientApp";
-
-				if (env.IsDevelopment()) {
-					spa.UseAngularCliServer(npmScript: "start");
-				}
+			app.UseEndpoints(endpoints => {
+				endpoints.MapControllerRoute(
+					name: "default",
+					pattern: "{controller}/{action=Index}/{id?}"
+				);
 			});
 		}
 	}

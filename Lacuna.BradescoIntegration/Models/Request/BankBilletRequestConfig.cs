@@ -113,7 +113,7 @@ namespace Lacuna.BradescoIntegration.Request {
 
 			for (int i = 0; i < 12; i++) {
 				var trimmedString = instructions[i].Trim();
-				Instructions[$"instrucao_linha_{i+1}"] = trimmedString.Length > 60 ? trimmedString.Substring(0, 60) : trimmedString;
+				Instructions[$"instrucao_linha_{i + 1}"] = trimmedString.Length > 60 ? trimmedString.Substring(0, 60) : trimmedString;
 			}
 
 			return 0;
@@ -168,7 +168,7 @@ namespace Lacuna.BradescoIntegration.Request {
 				throw new Exception("Valor do tipo de renderização é inválido");
 			}
 
-			if(Instructions != null && Instructions.Count != 0 && (Instructions.Count > 12 || Instructions.Any(p => p.Value.Length > 60))) {
+			if (Instructions != null && Instructions.Count != 0 && (Instructions.Count > 12 || Instructions.Any(p => p.Value.Length > 60))) {
 				throw new Exception("Não podem haver mais de 12 instruções e elas não podem ter mais de 60 caracteres (cada uma)");
 			}
 

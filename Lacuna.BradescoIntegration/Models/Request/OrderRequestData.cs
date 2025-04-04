@@ -2,10 +2,6 @@
 using Newtonsoft.Json;
 using Lacuna.BradescoIntegration.Utils;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lacuna.BradescoIntegration.Models.Request {
 	public class OrderRequestData : IModel {
